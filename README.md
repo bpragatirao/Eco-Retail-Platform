@@ -11,7 +11,6 @@ Eco-Retail is an end-to-end decision intelligence platform designed to minimize 
 Eco-Retail moves beyond static reporting by implementing a **closed-loop architecture**. This ensures that every data point—from a POS transaction to an expiry date—results in an automated business decision.
 
 
-
 ### The Data-to-Decision Pipeline:
 1.  **Ingestion:** Captures real-time sales and batch-specific inventory data (FIFO/FEFO).
 2.  **Engineering:** Transforms raw data into "Inventory Pressure" features and temporal lags.
@@ -38,6 +37,43 @@ The engine treats demand forecasting as a supervised learning problem.
 The "Action" layer that bridges the gap between analytics and operations.
 * **Context-Aware Markdowns:** Instead of flat discounts, markdowns are scaled based on the gap between *Current Stock* and *Predicted Demand*.
 * **Explainability:** Generates decision logs for every price change to ensure transparency for store managers.
+
+---
+
+## Project Setup and Execution
+
+Follow the steps below to prepare your environment and run the application.
+
+### 1. Configure the Virtual Environment
+Create and activate a virtual environment to keep your dependencies isolated.
+
+Windows:
+
+```bash
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+macOS/Linux:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 2. Install Required Packages
+With the virtual environment active, install all necessary libraries:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the Project
+Launch the application by running the main script:
+
+```bash
+python main.py
+```
 
 ---
 
