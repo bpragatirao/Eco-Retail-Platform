@@ -15,10 +15,10 @@ def run_dashboard(calculated_price):
     day_of_week = st.selectbox("Day of Week", [0,1,2,3,4,5,6])
 
     logger.info("Dashboard rendered")
-    logger.info("\nStock Value: ", stock)
-    logger.info("\nDays to Expiry: ", days_to_expiry)
-    logger.info("\nBase Price: ",base_price)
-    logger.info("\nDay of Week: ",day_of_week)
+    logger.info(f"Stock Value: {stock}")
+    logger.info(f"Days to Expiry: {days_to_expiry}")
+    logger.info(f"Base Price: {base_price}")
+    logger.info(f"Day of Week: {day_of_week}")
 
     if st.button("Calculate Price"):
         price = dynamic_price(
