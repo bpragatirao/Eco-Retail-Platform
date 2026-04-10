@@ -1,0 +1,35 @@
+{
+  "version": "20260411_001425",
+  "metrics": {
+    "mae": 2.0158,
+    "rmse": 2.3678,
+    "r2": -0.1237,
+    "train_samples": 1392,
+    "test_samples": 349,
+    "features_used": [
+      "day_of_week",
+      "month",
+      "is_weekend",
+      "week_of_year",
+      "category_encoded",
+      "base_price"
+    ]
+  },
+  "feature_importance": {
+    "day_of_week": 0.2409,
+    "month": 0.0465,
+    "is_weekend": 0.0241,
+    "week_of_year": 0.2638,
+    "category_encoded": 0.1055,
+    "base_price": 0.3192
+  },
+  "features": [
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "week_of_year",
+    "category_encoded",
+    "base_price"
+  ],
+  "trained_at": "2026-04-11T00:14:26.221030"
+}
