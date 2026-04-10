@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Eco-Retail: AI-driven dynamic pricing engine to reduce perishable food waste and optimize retail revenue through intelligent inventory management.">
+    <title>Eco-Retail — Intelligent Dynamic Pricing Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- ── Navigation ─────────────────────────────────────────────────── -->
+    <nav class="navbar" id="main-nav">
+        <div class="navbar-brand">
+            <div class="navbar-logo">🍎</div>
+            <div>
+                <div class="navbar-title">Eco-Retail</div>
+                <div class="navbar-subtitle">Dynamic Pricing Engine</div>
+            </div>
+        </div>
+        <div class="navbar-nav">
+            <button class="nav-btn active" data-page="overview" id="nav-overview">Overview</button>
+            <button class="nav-btn" data-page="simulator" id="nav-simulator">Pricing Simulator</button>
+            <button class="nav-btn" data-page="inventory" id="nav-inventory">Inventory</button>
+            <button class="nav-btn" data-page="analytics" id="nav-analytics">Analytics</button>
+            <button class="nav-btn" data-page="alerts" id="nav-alerts">
+                Alerts <span class="section-badge" id="alert-count-badge" style="margin-left:4px">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="app-container">
+
+        <!-- ── PAGE: Overview ─────────────────────────────────────────── -->
+        <div class="page-section active" id="page-overview">
+
+            <!-- Hero Metrics -->
+            <div class="metrics-grid" id="metrics-grid">
+                <div class="metric-card" id="metric-revenue">
+                    <div class="metric-icon green">💰</div>
+                    <div class="metric-label">Total Revenue</div>
+                    <div class="metric-value">₹<span class="counter" id="counter-revenue">0</span></div>
+                    <div class="metric-change positive">
+                        <span>↑</span> Live from transactions
+                    </div>
+                </div>
+                <div class="metric-card" id="metric-recovered">
+                    <div class="metric-icon purple">🛡️</div>
+                    <div class="metric-label">Revenue Recovered</div>
+                    <div class="metric-value">₹<span class="counter" id="counter-recovered">0</span></div>
+                    <div class="metric-change positive">
+                        <span>↑</span> Saved via dynamic pricing
+                    </div>
+                </div>
+                <div class="metric-card" id="metric-waste">
+                    <div class="metric-icon yellow">🗑️</div>
+                    <div class="metric-label">Waste Value Lost</div>
+                    <div class="metric-value">₹<span class="counter" id="counter-waste">0</span></div>
+                    <div class="metric-change negative">
+                        <span>↓</span> Target: reduce by 40%
+                    </div>
+                </div>
+                <div class="metric-card" id="metric-critical">
+                    <div class="metric-icon red">🚨</div>
+                    <div class="metric-label">Critical Alerts</div>
+                    <div class="metric-value"><span class="counter" id="counter-critical">0</span></div>
+                    <div class="metric-change negative">
+                        <span>⚡</span> Needs immediate action
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-grid">
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">📈 Revenue Trend (Last 30 Days)</h3>
+                    </div>
+                    <canvas id="chart-revenue" class="chart-canvas"></canvas>
+                </div>
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">📊 Revenue by Category</h3>
+                    </div>
+                    <canvas id="chart-category" class="chart-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Quick Alerts -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">⚡ Top Alerts</h3>
+                    <button class="nav-btn" onclick="switchPage('alerts')" id="btn-view-all-alerts">View All →</button>
+                </div>
+                <div id="overview-alerts">
+                    <div class="empty-state">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top:12px; font-size:0.85rem">Loading alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── PAGE: Pricing Simulator ────────────────────────────────── -->
+        <div class="page-section" id="page-simulator">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🧪 Dynamic Pricing Simulator</h2>
+                    <span class="section-badge">AI-Powered</span>
+                </div>
+
+                <div class="simulator-grid">
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Input Parameters</h3>
+                        </div>
+                        <form class="simulator-form" id="simulator-form">
+                            <div class="form-group">
+                                <label class="form-label" for="sim-stock">Current Stock (units)</label>
+                                <input type="number" class="form-input" id="sim-stock" value="50" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="sim-expiry">Days to Expiry</label>
+                                <input type="number" class="form-input" id="sim-expiry" value="2" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="sim-price">Base Price (₹)</label>
+                                <input type="number" class="form-input" id="sim-price" value="60" min="0" step="0.5">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="sim-category">Product Category</label>
+                                <select class="form-select" id="sim-category">
+                                    <option value="dairy">🥛 Dairy</option>
+                                    <option value="produce">🥬 Produce</option>
+                                    <option value="bakery">🍞 Bakery</option>
+                                    <option value="meat">🍗 Meat</option>
+                                    <option value="beverages">🧃 Beverages</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary" id="btn-calculate">
+                                ⚡ Calculate Dynamic Price
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="glass-panel">
+                        <div class="simulator-result" id="simulator-result">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🧮</div>
+                                <p>Enter parameters and click<br><strong>Calculate Dynamic Price</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── PAGE: Inventory ────────────────────────────────────────── -->
+        <div class="page-section" id="page-inventory">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📦 Inventory Batches</h2>
+                    <span class="section-badge" id="inventory-count">Loading...</span>
+                </div>
+
+                <div class="glass-panel">
+                    <div class="table-container">
+                        <table class="data-table" id="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Stock</th>
+                                    <th>Remaining</th>
+                                    <th>Expiry Date</th>
+                                    <th>Days Left</th>
+                                    <th>Risk Score</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-tbody">
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="empty-state">
+                                            <div class="loading-spinner"></div>
+                                            <p style="margin-top:12px; font-size:0.85rem">Loading inventory...</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── PAGE: Analytics ────────────────────────────────────────── -->
+        <div class="page-section" id="page-analytics">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📊 Waste & Revenue Analytics</h2>
+                </div>
+
+                <!-- Waste Metrics -->
+                <div class="metrics-grid" style="margin-bottom: var(--space-xl)">
+                    <div class="metric-card">
+                        <div class="metric-icon red">🗑️</div>
+                        <div class="metric-label">Total Waste (units)</div>
+                        <div class="metric-value"><span class="counter" id="counter-waste-qty">0</span></div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon yellow">💸</div>
+                        <div class="metric-label">Waste Value Lost</div>
+                        <div class="metric-value">₹<span class="counter" id="counter-waste-value">0</span></div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon green">🏷️</div>
+                        <div class="metric-label">Avg Discount Applied</div>
+                        <div class="metric-value"><span class="counter" id="counter-avg-discount">0</span>%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon purple">📋</div>
+                        <div class="metric-label">Discounted Transactions</div>
+                        <div class="metric-value"><span class="counter" id="counter-disc-txns">0</span></div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">🗑️ Waste by Category</h3>
+                        </div>
+                        <canvas id="chart-waste-category" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">📋 Waste by Reason</h3>
+                        </div>
+                        <canvas id="chart-waste-reason" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── PAGE: Alerts ───────────────────────────────────────────── -->
+        <div class="page-section" id="page-alerts">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🚨 Near-Expiry Alerts</h2>
+                    <span class="section-badge" id="alerts-total-badge">0 alerts</span>
+                </div>
+
+                <div id="alerts-list">
+                    <div class="empty-state">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top:12px; font-size:0.85rem">Loading alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
