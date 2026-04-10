@@ -1,112 +1,162 @@
-# Eco-Retail: AI-Driven Dynamic Pricing Engine 🍎📉
+# 🍎 Eco-Retail — Intelligent Dynamic Pricing Platform
 
-> **Turning Perishable Waste into Profitable Value through Intelligent Decision Automation.**
-
-Eco-Retail is an end-to-end decision intelligence platform designed to minimize perishable inventory waste and maximize revenue recovery. By integrating batch-level tracking with machine learning demand forecasting, the system automates pricing actions to ensure products are sold before they expire.
-
----
-
-## 🏗️ System Architecture
-
-Eco-Retail moves beyond static reporting by implementing a **closed-loop architecture**. This ensures that every data point—from a POS transaction to an expiry date—results in an automated business decision.
-
-
-### The Data-to-Decision Pipeline:
-1.  **Ingestion:** Captures real-time sales and batch-specific inventory data (FIFO/FEFO).
-2.  **Engineering:** Transforms raw data into "Inventory Pressure" features and temporal lags.
-3.  **Forecasting:** A Gradient Boosted model predicts demand for the remaining shelf-life of each batch.
-4.  **Optimization:** The Pricing Engine calculates the optimal markdown required to clear stock.
-5.  **Execution:** Prices are served via REST API to digital price tags or POS systems.
-6.  **Learning:** Post-pricing sales data is fed back into the pipeline to refine price elasticity models.
+> **Turning Perishable Waste into Profitable Value**
+> 
+> An AI-driven dynamic pricing engine that reduces perishable food waste and optimizes retail revenue through batch-level inventory tracking, ML demand forecasting, and multi-factor waste risk scoring.
 
 ---
 
-## ⚙️ Core Modules
-
-### 1. Batch-Level Inventory Intelligence
-Standard systems track products; Eco-Retail tracks **batches**. This allows the system to differentiate between "Milk" arriving today and "Milk" expiring tomorrow.
-* **FEFO Logic:** Prioritizes First-Expiring-First-Out movement.
-* **Expiry Risk Scoring:** Calculates the probability of a batch becoming waste based on current velocity.
-
-### 2. Predictive Demand Modeling
-The engine treats demand forecasting as a supervised learning problem.
-* **Feature Engineering:** Includes rolling sales averages, price-point history, and seasonal trends.
-* **Model:** Optimized Regressors (XGBoost/LightGBM) provide short-term (24-48hr) volume predictions.
-
-### 3. Dynamic Pricing Engine
-The "Action" layer that bridges the gap between analytics and operations.
-* **Context-Aware Markdowns:** Instead of flat discounts, markdowns are scaled based on the gap between *Current Stock* and *Predicted Demand*.
-* **Explainability:** Generates decision logs for every price change to ensure transparency for store managers.
-
----
-
-## Project Setup and Execution
-
-Follow the steps below to prepare your environment and run the application.
-
-### 1. Configure the Virtual Environment
-Create and activate a virtual environment to keep your dependencies isolated.
-
-Windows:
+## ⚡ Quick Start
 
 ```bash
+# 1. Clone and enter the project
+git clone https://github.com/your-username/eco-retail-platform.git
+cd eco-retail-platform
+
+# 2. Set up virtual environment
 python -m venv venv
-.\venv\Scripts\activate
-```
+source venv/bin/activate  # macOS/Linux
 
-macOS/Linux:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 2. Install Required Packages
-With the virtual environment active, install all necessary libraries:
-
-```bash
+# 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. Configure environment
+cp .env.example .env
+# Edit .env if needed (SQLite is the default — no DB setup required)
+
+# 5. Seed the database with synthetic data
+python -m db.seed
+
+# 6. Train the ML model
+python -m ml.train_model
+
+# 7. Launch the dashboard
+python -m api.app
+# Visit http://localhost:8000
 ```
 
-### 3. Run the Project
-Launch the application by running the main script:
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Dashboard (HTML/CSS/JS)               │
+│   Overview · Pricing Simulator · Inventory · Analytics   │
+└──────────────────────┬──────────────────────────────────┘
+                       │ fetch()
+┌──────────────────────▼──────────────────────────────────┐
+│                    FastAPI Backend                        │
+│   /api/products · /api/inventory · /api/price/calculate  │
+│   /api/alerts · /api/analytics/waste · /api/analytics/   │
+└────┬─────────────────┬──────────────────────┬───────────┘
+     │                 │                      │
+┌────▼────┐    ┌───────▼───────┐    ┌────────▼────────┐
+│   DB    │    │  ML Engine    │    │  AI Pricing     │
+│ SQLAlch │    │  RandomForest │    │  Multi-tier     │
+│  ORM    │    │  Multi-feat   │    │  Waste Risk     │
+└─────────┘    └───────────────┘    └─────────────────┘
+```
+
+---
+
+## 📂 Project Structure
+
+```
+eco-retail-platform/
+├── api/                    # FastAPI backend
+│   ├── app.py              # Main API application (8 endpoints)
+│   └── schemas.py          # Pydantic request/response models
+├── ai/                     # AI decision-making layer
+│   ├── pricing_engine.py   # Multi-tier dynamic pricing
+│   └── waste_risk.py       # Waste risk scoring (0-100)
+├── ml/                     # Machine learning
+│   ├── train_model.py      # Multi-feature model training + evaluation
+│   └── predict_demand.py   # Demand prediction with caching
+├── db/                     # Database layer
+│   ├── models.py           # SQLAlchemy ORM models
+│   ├── schema.sql          # SQL schema (5 tables)
+│   └── seed.py             # Synthetic data generator
+├── etl/                    # ETL pipeline
+│   └── pipeline.py         # Extract → Transform → Load features
+├── dashboard/              # Frontend
+│   └── static/
+│       ├── index.html      # Dashboard UI
+│       ├── styles.css       # Design system (dark glassmorphism)
+│       └── app.js          # Dashboard logic & Chart.js
+├── tests/                  # Pytest suite
+│   ├── test_waste_risk.py  # Waste risk scoring tests
+│   └── test_api.py         # API integration tests
+├── config.py               # Centralized configuration
+├── .env.example            # Environment template
+├── requirements.txt        # Dependencies (pinned)
+├── pyproject.toml          # Python packaging
+└── README.md               # This file
+```
+
+---
+
+## 🧪 Key Features
+
+### 🤖 AI Dynamic Pricing
+- **Multi-tier discount strategy**: Critical (>70 risk) → aggressive discount, Warning (40-70) → moderate, Safe (<40) → maintain price
+- **Waste risk scoring**: 4-factor composite score (expiry urgency, stock surplus, category perishability, inventory utilization)
+- **Margin floor protection**: Never discounts below configurable minimum margin
+
+### 📊 ML Demand Forecasting
+- **Multi-feature model**: day of week, month, weekend flag, week of year, category, base price
+- **Evaluation metrics**: MAE, RMSE, R² score with train/test split
+- **Model versioning**: Timestamped saves with metadata JSON
+
+### ✨ Premium Dashboard
+- Dark mode with glassmorphism design
+- Animated metric counters
+- Interactive pricing simulator
+- Real-time inventory with risk status
+- Revenue trend & category charts
+- Near-expiry alert system
+
+---
+
+## 🧪 Running Tests
 
 ```bash
-python main.py
+pytest tests/ -v
 ```
+
+---
+
+## 📡 API Documentation
+
+Start the server and visit: **http://localhost:8000/docs**
+
+FastAPI auto-generates interactive Swagger documentation for all endpoints.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| **Language** | Python 3.9+ |
-| **Data Processing** | Pandas, SQLAlchemy |
-| **Machine Learning** | Scikit-learn, XGBoost |
-| **API Framework** | FastAPI |
-| **Database** | PostgreSQL (Relational Batch Tracking) |
-| **Monitoring** | Streamlit (Business Dashboard) |
+| Component | Technology |
+|-----------|-----------|
+| Language | Python 3.9+ |
+| Backend | FastAPI + Uvicorn |
+| Database | SQLite (dev) / PostgreSQL (prod) |
+| ORM | SQLAlchemy 2.0 |
+| ML/AI | Scikit-learn, Pandas |
+| Frontend | HTML, CSS, JavaScript, Chart.js |
+| Testing | Pytest |
 
 ---
 
-## 📈 Future Roadmap
-**Phase 1:** Advanced demand forecasting using Deep Learning (LSTMs).
-**Phase 2:** Real-time data streaming (Kafka) for instantaneous pricing updates.
-**Phase 3:** Reinforcement Learning (RL) for automated price-elasticity discovery.
+## 💡 Business Problem
 
----
+Retailers lose billions annually because static pricing cannot adapt to the ticking clock of expiration dates. **Eco-Retail** solves this by:
 
-## 🚀 Key Business Impact
+1. **Tracking** inventory at the batch level (FIFO/FEFO)
+2. **Predicting** demand using ML models
+3. **Scoring** waste risk across multiple factors
+4. **Adjusting** prices automatically as products approach expiry
+5. **Learning** from sales conversion to refine future pricing
 
-* **Revenue Recovery:** Captures value from aging inventory that would otherwise be a 100% loss.
-* **Waste Reduction:** Drastically reduces the environmental footprint of perishable goods.
-* **Operational Autonomy:** Reduces the manual labor involved in checking dates and applying manual discount stickers.
-
----
-
-## 💡 Project Philosophy
-> **"Prediction without action has zero business value."**
-> This project is designed to demonstrate how ML models can be operationalized into a proactive, self-healing retail ecosystem.
-
----
+> *"Prediction without action has zero business value."*
+> Eco-Retail doesn't just predict waste — it prevents it.
