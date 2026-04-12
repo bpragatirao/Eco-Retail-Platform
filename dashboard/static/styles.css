@@ -125,6 +125,7 @@ body::after {
     max-width: 1440px;
     margin: 0 auto;
     padding: var(--space-lg) var(--space-xl);
+    padding-bottom: var(--space-2xl);
 }
 
 /* ── Navigation Bar ───────────────────────────────────────────────────────── */
@@ -133,9 +134,7 @@ body::after {
     align-items: center;
     justify-content: space-between;
     padding: var(--space-md) var(--space-xl);
-    background: rgba(17, 24, 39, 0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: #0d1320;
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -837,6 +836,13 @@ body::after {
     font-size: 2.5rem;
     margin-bottom: var(--space-md);
     opacity: 0.5;
+}
+
+/* ── Scrollable containers (caps height to prevent page breakage) ─────── */
+.scrollable-panel {
+    max-height: 400px;
+    overflow-y: auto;
+    position: relative;
 }
 
 /* ── Page Sections (show/hide) ────────────────────────────────────────────── */
