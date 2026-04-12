@@ -6,7 +6,7 @@
     <meta name="description" content="Eco-Retail: AI-driven dynamic pricing engine to reduce perishable food waste and optimize retail revenue through intelligent inventory management.">
     <title>Eco-Retail — Intelligent Dynamic Pricing Dashboard</title>
     <link rel="stylesheet" href="/static/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 </head>
 <body>
 
@@ -71,19 +71,47 @@
                 </div>
             </div>
 
-            <!-- Charts Row -->
-            <div class="charts-grid">
-                <div class="glass-panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">📈 Revenue Trend (Last 30 Days)</h3>
+            <!-- Quick Stats Row -->
+            <div class="stats-row">
+                <div class="glass-panel compact-stat">
+                    <div class="compact-stat-header">
+                        <span class="compact-stat-icon">📦</span>
+                        <span class="compact-stat-label">Total Products</span>
                     </div>
-                    <canvas id="chart-revenue" class="chart-canvas"></canvas>
+                    <div class="compact-stat-value" id="stat-products">—</div>
                 </div>
-                <div class="glass-panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">📊 Revenue by Category</h3>
+                <div class="glass-panel compact-stat">
+                    <div class="compact-stat-header">
+                        <span class="compact-stat-icon">🏷️</span>
+                        <span class="compact-stat-label">Active Batches</span>
                     </div>
-                    <canvas id="chart-category" class="chart-canvas"></canvas>
+                    <div class="compact-stat-value" id="stat-batches">—</div>
+                </div>
+                <div class="glass-panel compact-stat">
+                    <div class="compact-stat-header">
+                        <span class="compact-stat-icon">⚠️</span>
+                        <span class="compact-stat-label">Avg Waste Risk</span>
+                    </div>
+                    <div class="compact-stat-value" id="stat-avg-risk">—</div>
+                </div>
+                <div class="glass-panel compact-stat">
+                    <div class="compact-stat-header">
+                        <span class="compact-stat-icon">🛒</span>
+                        <span class="compact-stat-label">Total Transactions</span>
+                    </div>
+                    <div class="compact-stat-value" id="stat-total-txns">—</div>
+                </div>
+            </div>
+
+            <!-- Revenue by Category — Horizontal Bars -->
+            <div class="glass-panel" style="margin-bottom: var(--space-lg)">
+                <div class="panel-header">
+                    <h3 class="panel-title">📊 Revenue by Category</h3>
+                </div>
+                <div id="overview-category-bars" class="stat-bars-container">
+                    <div class="empty-state" style="padding: var(--space-md)">
+                        <div class="loading-spinner"></div>
+                    </div>
                 </div>
             </div>
 
@@ -226,19 +254,23 @@
                     </div>
                 </div>
 
-                <!-- Charts -->
-                <div class="charts-grid">
+                <!-- Waste Breakdown — Compact Bars -->
+                <div class="stats-row" style="margin-bottom: var(--space-lg)">
                     <div class="glass-panel">
                         <div class="panel-header">
                             <h3 class="panel-title">🗑️ Waste by Category</h3>
                         </div>
-                        <canvas id="chart-waste-category" class="chart-canvas"></canvas>
+                        <div id="analytics-waste-bars" class="stat-bars-container">
+                            <div class="empty-state" style="padding: var(--space-md)"><div class="loading-spinner"></div></div>
+                        </div>
                     </div>
                     <div class="glass-panel">
                         <div class="panel-header">
-                            <h3 class="panel-title">📋 Waste by Reason</h3>
+                            <h3 class="panel-title">💰 Revenue by Category</h3>
                         </div>
-                        <canvas id="chart-waste-reason" class="chart-canvas"></canvas>
+                        <div id="analytics-revenue-bars" class="stat-bars-container">
+                            <div class="empty-state" style="padding: var(--space-md)"><div class="loading-spinner"></div></div>
+                        </div>
                     </div>
                 </div>
             </div>

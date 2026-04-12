@@ -636,17 +636,97 @@ body::after {
     animation: pulse-critical 1s infinite;
 }
 
-/* ── Charts Section ───────────────────────────────────────────────────────── */
-.charts-grid {
+/* ── Stats Row (compact inline cards) ─────────────────────────────────────── */
+.stats-row {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: var(--space-lg);
-    margin-bottom: var(--space-2xl);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
 }
 
-.chart-canvas {
-    width: 100%;
-    height: 280px;
+.compact-stat {
+    padding: var(--space-md) var(--space-lg) !important;
+}
+
+.compact-stat-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.compact-stat-icon {
+    font-size: 1.1rem;
+}
+
+.compact-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+}
+
+.compact-stat-value {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+/* ── Stat Bars (horizontal progress bars) ─────────────────────────────────── */
+.stat-bars-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.stat-bar-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-bar-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stat-bar-label-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.stat-bar-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-bar-track {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.8s ease-out;
+    min-width: 4px;
 }
 
 /* ── Alerts Panel ─────────────────────────────────────────────────────────── */

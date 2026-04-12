@@ -395,6 +395,8 @@ def get_dashboard_overview():
         avg_risk = sum(risk_scores) / len(risk_scores) if risk_scores else 0
         critical_count = sum(1 for s in risk_scores if s >= 70)
 
+        total_txns = session.query(Transaction).count()
+
         return DashboardOverview(
             total_products=total_products,
             active_batches=active_batches,
@@ -404,6 +406,8 @@ def get_dashboard_overview():
             revenue_recovered=round(revenue_recovered, 2),
             avg_waste_risk=round(avg_risk, 1),
             critical_alerts=critical_count,
+            total_transactions=total_txns,
+            avg_risk_score=round(avg_risk, 1),
         )
     finally:
         session.close()

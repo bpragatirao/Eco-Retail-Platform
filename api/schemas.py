@@ -121,3 +121,5 @@ class DashboardOverview(BaseModel):
     revenue_recovered: float
     avg_waste_risk: float
     critical_alerts: int
+    total_transactions: int = 0
+    avg_risk_score: float = 0.0

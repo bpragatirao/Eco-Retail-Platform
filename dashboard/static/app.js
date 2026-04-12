@@ -1,34 +1,13 @@
 /**
  * Eco-Retail Dashboard — Application Logic
- * Handles API communication, chart rendering, animations, and page navigation.
+ * Handles API communication, stat bar rendering, animations, and page navigation.
  */
 
 // ── Configuration ──────────────────────────────────────────────────────────
 const API_BASE = window.location.origin;
-const CHART_COLORS = {
-    green: '#10b981',
-    greenLight: 'rgba(16, 185, 129, 0.15)',
-    teal: '#06b6d4',
-    tealLight: 'rgba(6, 182, 212, 0.15)',
-    yellow: '#f59e0b',
-    yellowLight: 'rgba(245, 158, 11, 0.15)',
-    red: '#ef4444',
-    redLight: 'rgba(239, 68, 68, 0.15)',
-    purple: '#6366f1',
-    purpleLight: 'rgba(99, 102, 241, 0.15)',
-    orange: '#f97316',
-    blue: '#3b82f6',
-    pink: '#ec4899',
-    slate: '#64748b',
-};
-
-// Chart.js global defaults for dark theme
-Chart.defaults.color = '#9ca3af';
-Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.06)';
-Chart.defaults.font.family = "'Inter', sans-serif";
+const BAR_COLORS = ['#10b981', '#06b6d4', '#f59e0b', '#6366f1', '#f97316', '#3b82f6', '#ec4899'];
 
 // ── State ──────────────────────────────────────────────────────────────────
-let chartInstances = {};
 let currentPage = 'overview';
 
 // ── API Helper ─────────────────────────────────────────────────────────────
@@ -97,6 +76,43 @@ function formatLargeNumber(num) {
     return Math.round(num).toLocaleString('en-IN');
 }
 
+// ── Stat Bar Renderer (reusable) ───────────────────────────────────────────
+function renderStatBars(containerId, dataObj, valueFormatter = (v) => v.toLocaleString('en-IN')) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const entries = Object.entries(dataObj);
+    if (entries.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="padding:var(--space-md)"><p>No data available</p></div>`;
+        return;
+    }
+
+    const maxVal = Math.max(...entries.map(([, v]) => v));
+    const categoryEmojis = { dairy: '🥛', produce: '🥬', bakery: '🍞', meat: '🍗', beverages: '🧃' };
+
+    container.innerHTML = entries.map(([key, val], i) => {
+        const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
+        const color = BAR_COLORS[i % BAR_COLORS.length];
+        const label = key.charAt(0).toUpperCase() + key.slice(1);
+        const emoji = categoryEmojis[key.toLowerCase()] || '📊';
+
+        return `
+            <div class="stat-bar-item">
+                <div class="stat-bar-header">
+                    <span class="stat-bar-label">
+                        <span class="stat-bar-label-dot" style="background:${color}"></span>
+                        ${emoji} ${label}
+                    </span>
+                    <span class="stat-bar-value">${valueFormatter(val)}</span>
+                </div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill" style="width:${pct}%; background:${color}"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 // ── Page Navigation ────────────────────────────────────────────────────────
 function switchPage(pageName) {
     // Update nav buttons
@@ -136,132 +152,31 @@ async function loadOverview() {
         animateCounter('counter-waste', overview.total_waste_value);
         animateCounter('counter-critical', overview.critical_alerts);
 
+        // Populate compact stats
+        const el = (id) => document.getElementById(id);
+        if (el('stat-products')) el('stat-products').textContent = overview.total_products || '—';
+        if (el('stat-batches')) el('stat-batches').textContent = overview.active_batches || '—';
+        if (el('stat-avg-risk')) el('stat-avg-risk').textContent = overview.avg_risk_score
+            ? overview.avg_risk_score.toFixed(0)
+            : '—';
+        if (el('stat-total-txns')) el('stat-total-txns').textContent = overview.total_transactions
+            ? overview.total_transactions.toLocaleString('en-IN')
+            : '—';
+
         // Add critical class
         if (overview.critical_alerts > 0) {
             document.getElementById('metric-critical')?.classList.add('critical');
         }
     }
 
-    if (revenue) {
-        renderRevenueChart(revenue.daily_revenue);
-        renderCategoryChart(revenue.category_revenue);
+    if (revenue && revenue.category_revenue) {
+        renderStatBars('overview-category-bars', revenue.category_revenue, (v) => '₹' + formatLargeNumber(v));
     }
 
     if (alerts) {
         document.getElementById('alert-count-badge').textContent = alerts.length;
         renderOverviewAlerts(alerts.slice(0, 5));
     }
-}
-
-function renderRevenueChart(dailyRevenue) {
-    const ctx = document.getElementById('chart-revenue');
-    if (!ctx) return;
-    if (chartInstances['revenue']) chartInstances['revenue'].destroy();
-
-    const labels = dailyRevenue.map(d => {
-        const date = new Date(d.date);
-        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-    });
-    const data = dailyRevenue.map(d => d.revenue);
-
-    chartInstances['revenue'] = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Daily Revenue (₹)',
-                data,
-                borderColor: CHART_COLORS.green,
-                backgroundColor: CHART_COLORS.greenLight,
-                fill: true,
-                tension: 0.4,
-                borderWidth: 2,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointHoverBackgroundColor: CHART_COLORS.green,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                    padding: 12,
-                    titleFont: { family: "'Outfit', sans-serif", weight: '600' },
-                    callbacks: {
-                        label: (ctx) => `₹${ctx.parsed.y.toLocaleString('en-IN')}`,
-                    }
-                },
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { maxTicksLimit: 8, font: { size: 11 } },
-                },
-                y: {
-                    grid: { color: 'rgba(255,255,255,0.04)' },
-                    ticks: {
-                        font: { size: 11 },
-                        callback: (v) => '₹' + formatLargeNumber(v),
-                    },
-                },
-            },
-            interaction: { intersect: false, mode: 'index' },
-        }
-    });
-}
-
-function renderCategoryChart(categoryRevenue) {
-    const ctx = document.getElementById('chart-category');
-    if (!ctx) return;
-    if (chartInstances['category']) chartInstances['category'].destroy();
-
-    const labels = Object.keys(categoryRevenue).map(c => c.charAt(0).toUpperCase() + c.slice(1));
-    const data = Object.values(categoryRevenue);
-    const colors = [CHART_COLORS.green, CHART_COLORS.teal, CHART_COLORS.yellow, CHART_COLORS.purple, CHART_COLORS.orange];
-
-    chartInstances['category'] = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels,
-            datasets: [{
-                data,
-                backgroundColor: colors.slice(0, labels.length),
-                borderColor: 'rgba(10, 15, 26, 0.8)',
-                borderWidth: 3,
-                hoverOffset: 8,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 16,
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        font: { size: 12 },
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                    padding: 12,
-                    callbacks: {
-                        label: (ctx) => `₹${ctx.parsed.toLocaleString('en-IN')}`,
-                    }
-                },
-            }
-        }
-    });
 }
 
 function renderOverviewAlerts(alerts) {
@@ -446,101 +361,16 @@ async function loadAnalytics() {
     if (waste) {
         animateCounter('counter-waste-qty', waste.total_waste_quantity);
         animateCounter('counter-waste-value', waste.total_value_lost);
-        renderWasteCategoryChart(waste.waste_by_category);
-        renderWasteReasonChart(waste.waste_by_reason);
+        renderStatBars('analytics-waste-bars', waste.waste_by_category, (v) => `${v} units`);
     }
 
     if (revenue) {
         animateCounter('counter-avg-discount', revenue.avg_discount);
         animateCounter('counter-disc-txns', revenue.transactions_with_discount);
+        if (revenue.category_revenue) {
+            renderStatBars('analytics-revenue-bars', revenue.category_revenue, (v) => '₹' + formatLargeNumber(v));
+        }
     }
-}
-
-function renderWasteCategoryChart(wasteByCategory) {
-    const ctx = document.getElementById('chart-waste-category');
-    if (!ctx) return;
-    if (chartInstances['wasteCategory']) chartInstances['wasteCategory'].destroy();
-
-    const labels = Object.keys(wasteByCategory).map(c => c.charAt(0).toUpperCase() + c.slice(1));
-    const data = Object.values(wasteByCategory);
-    const colors = [CHART_COLORS.red, CHART_COLORS.orange, CHART_COLORS.yellow, CHART_COLORS.purple, CHART_COLORS.blue];
-
-    chartInstances['wasteCategory'] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Units Wasted',
-                data,
-                backgroundColor: colors.slice(0, labels.length).map(c => c + '33'),
-                borderColor: colors.slice(0, labels.length),
-                borderWidth: 1,
-                borderRadius: 6,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                    padding: 12,
-                },
-            },
-            scales: {
-                x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 11 } } },
-                y: { grid: { display: false }, ticks: { font: { size: 12 } } },
-            }
-        }
-    });
-}
-
-function renderWasteReasonChart(wasteByReason) {
-    const ctx = document.getElementById('chart-waste-reason');
-    if (!ctx) return;
-    if (chartInstances['wasteReason']) chartInstances['wasteReason'].destroy();
-
-    const labels = Object.keys(wasteByReason).map(c => c.charAt(0).toUpperCase() + c.slice(1));
-    const data = Object.values(wasteByReason);
-    const colors = [CHART_COLORS.red, CHART_COLORS.yellow, CHART_COLORS.blue];
-
-    chartInstances['wasteReason'] = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels,
-            datasets: [{
-                data,
-                backgroundColor: colors.slice(0, labels.length),
-                borderColor: 'rgba(10, 15, 26, 0.8)',
-                borderWidth: 3,
-                hoverOffset: 8,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '60%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', font: { size: 12 } }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                    padding: 12,
-                    callbacks: {
-                        label: (ctx) => `${ctx.parsed} units`,
-                    }
-                },
-            }
-        }
-    });
 }
 
 // ── Alerts Page ────────────────────────────────────────────────────────────
