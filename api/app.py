@@ -73,10 +73,13 @@ def startup_event():
 
 @app.get("/", include_in_schema=False)
 def serve_dashboard():
-    """Serve the main dashboard HTML."""
+    """Serve the main dashboard HTML with no-cache headers."""
     index_path = STATIC_DIR / "index.html"
     if index_path.exists():
-        return FileResponse(str(index_path))
+        return FileResponse(
+            str(index_path),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
     return {"message": "Eco-Retail API v2.0 — visit /docs for API documentation"}
 
 
