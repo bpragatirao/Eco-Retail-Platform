@@ -22,6 +22,7 @@ def dynamic_price(
     min_margin: float = None,
     day_of_week: int = None,
     month: int = None,
+    predicted_demand_override: float = None,
 ) -> dict:
     """
     Compute the optimal dynamic price using multi-tier strategy.
@@ -40,6 +41,7 @@ def dynamic_price(
         min_margin: Minimum margin to maintain (overrides config if set)
         day_of_week: Day of week (0=Mon, 6=Sun). Auto-detected if None.
         month: Month number (1-12). Auto-detected if None.
+        predicted_demand_override: Pre-computed demand to skip ML call. 
 
     Returns:
         Dictionary with price, discount, risk info, and reasoning.
@@ -54,11 +56,14 @@ def dynamic_price(
         month = datetime.today().month
 
     # ── Step 1: Predict demand ───────────────────────────────────────────
-    predicted_demand = predict_demand(
-        day_of_week=day_of_week,
-        month=month,
-        is_weekend=1 if day_of_week >= 5 else 0,
-    )
+    if predicted_demand_override is not None:
+        predicted_demand = predicted_demand_override
+    else:
+        predicted_demand = predict_demand(
+            day_of_week=day_of_week,
+            month=month,
+            is_weekend=1 if day_of_week >= 5 else 0,
+        )
 
     # ── Step 2: Compute waste risk ───────────────────────────────────────
     risk = compute_waste_risk(

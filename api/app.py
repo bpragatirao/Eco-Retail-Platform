@@ -57,10 +57,16 @@ if STATIC_DIR.exists():
 
 
 @app.on_event("startup")
-def startup():
-    """Initialize the database on startup."""
+def startup_event():
+    """Initialize database and preload ML model on startup."""
     init_db()
     logger.info("Database initialized")
+    # Preload the ML model into memory so first request isn't slow
+    try:
+        predict_demand(day_of_week=0)
+        logger.info("ML model preloaded")
+    except Exception:
+        logger.warning("ML model not available — run `python -m ml.train_model`")
 
 
 # ── Dashboard Serving ────────────────────────────────────────────────────────
@@ -114,15 +120,21 @@ def get_inventory():
 
         results = []
         today = date.today()
-        for batch, product in batches:
-            days_left = (batch.expiry_date - today).days
 
-            # Compute waste risk for each batch
+        # Predict demand ONCE for today (same temporal features for all batches)
+        try:
             demand = predict_demand(
                 day_of_week=today.weekday(),
                 month=today.month,
                 is_weekend=1 if today.weekday() >= 5 else 0,
             )
+        except Exception:
+            demand = 5.0
+
+        for batch, product in batches:
+            days_left = (batch.expiry_date - today).days
+
+            # Compute waste risk for each batch
             risk = compute_waste_risk(
                 days_to_expiry=days_left,
                 remaining_quantity=batch.remaining_quantity,
@@ -193,14 +205,19 @@ def get_alerts():
             .all()
         )
 
-        alerts = []
-        for batch, product in batches:
-            days_left = (batch.expiry_date - today).days
+        # Predict demand ONCE (same day features for all batches)
+        try:
             demand = predict_demand(
                 day_of_week=today.weekday(),
                 month=today.month,
                 is_weekend=1 if today.weekday() >= 5 else 0,
             )
+        except Exception:
+            demand = 5.0
+
+        alerts = []
+        for batch, product in batches:
+            days_left = (batch.expiry_date - today).days
             risk = compute_waste_risk(
                 days_to_expiry=days_left,
                 remaining_quantity=batch.remaining_quantity,
@@ -215,6 +232,7 @@ def get_alerts():
                 base_price=product.base_price,
                 total_quantity=batch.quantity,
                 category=product.category,
+                predicted_demand_override=demand,
             )
 
             alerts.append(AlertResponse(
