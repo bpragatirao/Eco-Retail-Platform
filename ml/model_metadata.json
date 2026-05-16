@@ -1,11 +1,11 @@
 {
-  "version": "20260411_010108",
+  "version": "20260412_221408",
   "metrics": {
-    "mae": 2.179,
-    "rmse": 2.5292,
-    "r2": -0.0885,
-    "train_samples": 1460,
-    "test_samples": 366,
+    "mae": 2.0739,
+    "rmse": 2.4426,
+    "r2": -0.1188,
+    "train_samples": 1432,
+    "test_samples": 359,
     "features_used": [
       "day_of_week",
       "month",
@@ -16,12 +16,12 @@
     ]
   },
   "feature_importance": {
-    "day_of_week": 0.2476,
-    "month": 0.0494,
-    "is_weekend": 0.0276,
-    "week_of_year": 0.2807,
-    "category_encoded": 0.0957,
-    "base_price": 0.2989
+    "day_of_week": 0.2696,
+    "month": 0.0387,
+    "is_weekend": 0.0274,
+    "week_of_year": 0.2404,
+    "category_encoded": 0.1032,
+    "base_price": 0.3207
   },
   "features": [
     "day_of_week",
@@ -31,5 +31,5 @@
     "category_encoded",
     "base_price"
   ],
-  "trained_at": "2026-04-11T01:01:09.128756"
+  "trained_at": "2026-04-12T22:14:09.153575"
 }
